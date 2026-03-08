@@ -47,12 +47,21 @@ const register = async (req, res) => {
     
     await user.save();
     
-    // Send verification email
-    const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${user._id}`;
-    await sendVerificationEmail(email, verificationLink);
-    
-    // Send welcome email
-    await sendWelcomeEmail(email, firstName);
+    // Send verification email (non-blocking - don't wait)
+    try {
+      const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${user._id}`;
+      sendVerificationEmail(email, verificationLink).catch(err => {
+        console.error('Verification email failed:', err.message);
+      });
+      
+      // Send welcome email (non-blocking)
+      sendWelcomeEmail(email, firstName).catch(err => {
+        console.error('Welcome email failed:', err.message);
+      });
+    } catch (emailError) {
+      console.error('Email service error:', emailError.message);
+      // Don't block registration if email fails
+    }
     
     const token = generateToken(user._id);
     
