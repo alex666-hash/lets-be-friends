@@ -42,7 +42,14 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Database connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/lets-be-friends')
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/lets-be-friends', {
+  retryWrites: true,
+  w: 'majority',
+  socketTimeoutMS: 45000,
+  serverSelectionTimeoutMS: 45000,
+  connectTimeoutMS: 10000,
+  maxPoolSize: 10
+})
   .then(() => console.log('✓ MongoDB connected'))
   .catch(err => console.error('✗ MongoDB connection error:', err));
 
