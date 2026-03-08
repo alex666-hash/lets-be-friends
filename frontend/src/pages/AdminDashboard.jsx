@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuthStore } from '../store/authStore';
+import useAuthStore from '../store/authStore';
 import { AdminAPI } from '../utils/api';
 import { FiUsers, FiAlertTriangle, FiCheckCircle, FiTrendingUp, FiLogOut } from 'react-icons/fi';
 import { toast } from 'react-toastify';
