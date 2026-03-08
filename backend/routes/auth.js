@@ -9,27 +9,46 @@ const dummyOAuth = (req, res) => {
   res.status(503).json({ success: false, message: 'OAuth not configured' });
 };
 
+// Safe OAuth middleware wrapper
+const safeGoogleAuth = (req, res, next) => {
+  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    return passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
+  }
+  return dummyOAuth(req, res);
+};
+
+const safeGoogleCallback = (req, res, next) => {
+  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    return passport.authenticate('google', { failureRedirect: '/login' })(req, res, next);
+  }
+  return dummyOAuth(req, res);
+};
+
+const safeFacebookAuth = (req, res, next) => {
+  if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
+    return passport.authenticate('facebook', { scope: ['email'] })(req, res, next);
+  }
+  return dummyOAuth(req, res);
+};
+
+const safeFacebookCallback = (req, res, next) => {
+  if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
+    return passport.authenticate('facebook', { failureRedirect: '/login' })(req, res, next);
+  }
+  return dummyOAuth(req, res);
+};
+
 // Local authentication
 router.post('/register', register);
 router.post('/login', login);
 
-// Google OAuth - only if credentials provided
-if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-  router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-  router.get('/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), googleCallback);
-} else {
-  router.get('/google', dummyOAuth);
-  router.get('/google/callback', dummyOAuth);
-}
+// Google OAuth with safe wrapper
+router.get('/google', safeGoogleAuth);
+router.get('/google/callback', safeGoogleCallback, googleCallback);
 
-// Facebook OAuth - only if credentials provided
-if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
-  router.get('/facebook', passport.authenticate('facebook', { scope: ['email'] }));
-  router.get('/facebook/callback', passport.authenticate('facebook', { failureRedirect: '/login' }), facebookCallback);
-} else {
-  router.get('/facebook', dummyOAuth);
-  router.get('/facebook/callback', dummyOAuth);
-}
+// Facebook OAuth with safe wrapper
+router.get('/facebook', safeFacebookAuth);
+router.get('/facebook/callback', safeFacebookCallback, facebookCallback);
 
 // Get current user
 router.get('/me', auth, getCurrentUser);
