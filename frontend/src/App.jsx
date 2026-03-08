@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './index.css';
+import { Analytics } from '@vercel/analytics/react';
 
 import ProtectedRoute from './components/ProtectedRoute';
 import useAuthStore from './store/authStore';
@@ -28,6 +29,7 @@ function App() {
   return (
     <Router>
       <ToastContainer position="bottom-right" autoClose={3000} />
+      <Analytics />
       <Routes>
         {/* Public Routes */}
         <Route path="/login" element={<Login />} />
